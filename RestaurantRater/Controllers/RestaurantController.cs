@@ -15,19 +15,21 @@ namespace RestaurantRater.Controllers
         private readonly RestaurantDbContext _dbContext = new RestaurantDbContext();
 
         //POST
+        [HttpPost]
         public async Task<IHttpActionResult> PostRestaurant(Restaurant restaurant)
         {
             if (ModelState.IsValid && restaurant != null)
             {
                 _dbContext.Restaurants.Add(restaurant);
                 await _dbContext.SaveChangesAsync();
-                return Ok(); 
+                return Ok();
             }
             else
                 return BadRequest(ModelState);
         }
 
         //GET ALL
+        [HttpGet]
         public async Task<IHttpActionResult> GetAllRestaurants()
         {
             List<Restaurant> restaurants = await _dbContext.Restaurants.ToListAsync();
@@ -35,6 +37,7 @@ namespace RestaurantRater.Controllers
         }
 
         //GET BY ID
+        [HttpGet]
         public async Task<IHttpActionResult> GetRestaurantById(int id)
         {
             Restaurant restaurant = await _dbContext.Restaurants.FindAsync(id);
@@ -44,7 +47,45 @@ namespace RestaurantRater.Controllers
             else
                 return NotFound();
         }
+
         //PUT
+        [HttpPut]
+        public async Task<IHttpActionResult> UpdateRestaurant([FromUri] int id, [FromBody] Restaurant model)
+        {
+            if (ModelState.IsValid && model != null)
+            {
+                Restaurant restaurant = await _dbContext.Restaurants.FindAsync(id);
+                if (restaurant != null)
+                {
+                    restaurant.Name = model.Name;
+                    restaurant.Style = model.Style;
+                    restaurant.Rating = model.Rating;
+                    restaurant.DollarSigns = model.DollarSigns;
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok();
+                }
+                else
+                    return NotFound();
+            }
+            else
+                return BadRequest(ModelState);
+        }
+
         //DELETE BY ID
+        [HttpDelete]
+        public async Task<IHttpActionResult> DeleteRestaurant(int id)
+        {
+            Restaurant restaurant = _dbContext.Restaurants.Find(id);
+            if (restaurant != null)
+            {
+                _dbContext.Restaurants.Remove(restaurant);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            else
+                return NotFound();
+        }
     }
 }
